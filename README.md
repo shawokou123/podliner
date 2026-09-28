@@ -20,10 +20,16 @@
   <img alt="Platforms" src="https://img.shields.io/badge/platforms-linux%20%7C%20macOS%20%7C%20windows-666">
 </p>
 
+> **Note:** this build is a fork (`shawokou123/podliner`) that makes the UI use
+> your terminal's **default background**, so translucent / glass terminals show
+> through instead of an opaque block. See
+> [Transparent / glass background](#transparent--glass-background).
+
 ---
 
 ## Table of Contents
 - [Why podliner?](#why-podliner)
+- [Transparent / glass background](#transparent--glass-background)
 - [Screenshots](#screenshots)
 - [Install (stable releases)](#install-stable-releases)
 - [Quick start](#quick-start)
@@ -56,6 +62,55 @@
 - **Engine choice.** Works with mpv, ffplay (FFmpeg), or VLC where available.
 
 > No telemetry. Config lives in your user profile. All local.
+
+
+## Transparent / glass background
+
+> This is the main change in this fork. It makes podliner blend into a
+> translucent / glass terminal instead of drawing an opaque block.
+
+**The problem.** Terminal.Gui 1.x paints every cell with an explicit background
+colour (ncurses `\e[40m`, `\e[44m`, …). On a terminal with transparency — Omarchy
+"liquid glass", foot `alpha`, ghostty `background-opacity`, alacritty `window.opacity` —
+those cells stay opaque, so the whole UI reads as a solid black rectangle while the
+rest of the terminal is see-through. `cmatrix` solves the same problem with ncurses'
+`use_default_colors()`; Terminal.Gui 1.x has no equivalent.
+
+**The fix.** When a background colour is black, the curses driver now passes `-1`
+(terminal default) to `init_pair()` instead of `COLOR_BLACK`. The terminal then draws
+its own default background, including transparency and blur. Coloured highlights —
+selection, focus, progress and volume bars — still paint normally.
+
+The `Base`, `MenuAccent` and `User` themes all use the transparent palette; only
+`Native` keeps the driver's built-in colours.
+
+**How it is packaged.** The change needs a one-hunk patch to Terminal.Gui
+`v1.19.0`, so this fork ships it both as a readable source patch and as a prebuilt,
+vendored NuGet package. A plain `dotnet build` / `dotnet publish` works with no extra
+steps:
+
+- `third_party/terminal-gui-transparent/default-background.patch` — the source patch
+- `local-nuget/Terminal.Gui.1.19.0-transparent.nupkg` + `NuGet.config` — the prebuilt package
+
+```bash
+git clone https://github.com/shawokou123/podliner.git
+cd podliner
+dotnet publish ./Podliner.App/Podliner.App.csproj -c Release -r linux-x64 \
+  -p:SelfContained=true -p:PublishSingleFile=true \
+  -p:IncludeNativeLibrariesForSelfExtract=true
+```
+
+### 背景透明化说明（中文）
+
+这是本 fork 的主要改动：让 podliner 的背景改用**终端默认背景**，从而在半透明 /
+毛玻璃终端下透出终端背景，而不再是纯黑的实心色块（与 `cmatrix` 的
+`use_default_colors()` 原理相同）。具体做法是给 Terminal.Gui 的 curses 驱动打一个
+小补丁：当背景色为黑色时改用 `init_pair(..., -1)`，让终端画自己的默认背景；
+选中行、焦点、进度条/音量条等彩色高亮保持不变。`Base`、`MenuAccent`、`User`
+三个主题均为透明配色，仅 `Native` 保留内置配色。
+
+补丁同时以源码补丁和预编译的 NuGet 包形式提交，直接 `dotnet build` / `dotnet publish`
+即可编译，无需额外步骤。
 
 
 ## Screenshots
