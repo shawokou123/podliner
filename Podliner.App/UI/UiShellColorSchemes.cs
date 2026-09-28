@@ -28,9 +28,12 @@ internal static class UiShellColorSchemes
         string Purple, string Blue, string Yellow);
 
     private static readonly Palette UserPal = new(
+        // Bg/Bg2/Dim all approximate to ANSI black, which the patched driver
+        // renders as the terminal's own default background. That is what makes
+        // the UI transparent (glass) instead of painting an opaque block.
         Bg:     "#2a2a2a",
-        Bg2:    "#333333",
-        Dim:    "#222222",
+        Bg2:    "#2a2a2a",
+        Dim:    "#2a2a2a",
         Fg:     "#bec1bf",
         Comment:"#8a8a8a",
         Orange: "#df970d",

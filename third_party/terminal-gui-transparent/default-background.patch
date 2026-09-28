@@ -1,0 +1,53 @@
+diff --git a/Terminal.Gui/ConsoleDrivers/CursesDriver/CursesDriver.cs b/Terminal.Gui/ConsoleDrivers/CursesDriver/CursesDriver.cs
+index fb5fa1c..b0d0f5f 100644
+--- a/Terminal.Gui/ConsoleDrivers/CursesDriver/CursesDriver.cs
++++ b/Terminal.Gui/ConsoleDrivers/CursesDriver/CursesDriver.cs
+@@ -186,9 +186,18 @@ namespace Terminal.Gui {
+ 		/// <param name="foreground">Contains the curses attributes for the foreground (color, plus any attributes)</param>
+ 		/// <param name="background">Contains the curses attributes for the background (color, plus any attributes)</param>
+ 		/// <returns></returns>
++		// Background index reserved to mean "terminal default background".
++		// ncurses pair 0-ish semantics: passing -1 as the background to
++		// init_pair() (after use_default_colors()) makes the terminal draw
++		// its own default background, which is what lets translucent/glass
++		// terminals show through instead of an opaque block. Index 15 is
++		// otherwise unused as a background by the 16-colour palette.
++		const short DefaultBackgroundIndex = 15;
++
+ 		public static Attribute MakeColor (short foreground, short background)
+ 		{
+-			var v = (short)((int)foreground | background << 4);
++			var bgIndex = background < 0 ? DefaultBackgroundIndex : background;
++			var v = (short)((int)foreground | bgIndex << 4);
+ 			//Curses.InitColorPair (++last_color_pair, foreground, background);
+ 			Curses.InitColorPair (v, foreground, background);
+ 			return new Attribute (
+@@ -197,12 +206,12 @@ namespace Terminal.Gui {
+ 				//foreground: (Color)foreground,
+ 				foreground: MapCursesColor (foreground),
+ 				//background: (Color)background);
+-				background: MapCursesColor (background));
++				background: background < 0 ? Color.Black : MapCursesColor (background));
+ 		}
+ 
+ 		public override Attribute MakeColor (Color fore, Color back)
+ 		{
+-			return MakeColor ((short)MapColor (fore), (short)MapColor (back));
++			return MakeColor ((short)MapColor (fore), back == Color.Black ? (short)-1 : (short)MapColor (back));
+ 		}
+ 
+ 		int [,] colorPairs = new int [16, 16];
+@@ -858,8 +867,11 @@ namespace Terminal.Gui {
+ 		public override Attribute MakeAttribute (Color fore, Color back)
+ 		{
+ 			var f = MapColor (fore);
+-			//return MakeColor ((short)(f & 0xffff), (short)MapColor (back)) | ((f & Curses.A_BOLD) != 0 ? Curses.A_BOLD : 0);
+-			return MakeColor ((short)(f & 0xffff), (short)MapColor (back));
++			// A black background means "use the terminal's default background"
++			// (transparent), so pass -1 to ncurses instead of COLOR_BLACK.
++			var b = back == Color.Black ? -1 : MapColor (back);
++			//return MakeColor ((short)(f & 0xffff), (short)b) | ((f & Curses.A_BOLD) != 0 ? Curses.A_BOLD : 0);
++			return MakeColor ((short)(f & 0xffff), (short)b);
+ 		}
+ 
+ 		public override void Suspend ()

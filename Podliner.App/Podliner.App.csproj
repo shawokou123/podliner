@@ -10,8 +10,11 @@
         <PackageReference Include="Serilog" Version="4.3.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 
-        <!-- Terminal.Gui: match the working version -->
-        <PackageReference Include="Terminal.Gui" Version="1.19.0" />
+        <!-- Terminal.Gui 1.19.0, locally patched so black backgrounds map to the
+             terminal's default background (transparent/glass). The patched
+             package is vendored in ./local-nuget and wired up via NuGet.config;
+             source patch: third_party/terminal-gui-transparent/ -->
+        <PackageReference Include="Terminal.Gui" Version="1.19.0-transparent" />
 
         <!-- LibVLCSharp managed bindings (platform-independent) -->
         <PackageReference Include="LibVLCSharp" Version="3.8.4" />

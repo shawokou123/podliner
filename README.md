@@ -42,6 +42,7 @@
 ## Why podliner? 
 
 - **Keyboard-first & mouse-friendly.** Full mouse support (click, select, scroll) with fast TUI feedback.
+- **Glass-friendly.** The UI uses your terminal's default background, so translucent / transparent terminals show through instead of an opaque block.
 - **Vim keys & commands.** Familiar navigation (`j/k`, `gg/G`, `/` to search) plus concise colon-commands (`:add <url>`, `:queue add`, `:opml import`, `:opml export`).
 - **Chapters.** Podcast-2.0 `<podcast:chapters>` JSON and ID3 CHAP frames, with a dedicated Chapters tab and `,`/`.` keys to jump.
 - **Sync progress and subscriptions** via the gPodder API (gpodder.net + Nextcloud gPodder-Sync, auto-detected).

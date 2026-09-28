@@ -19,6 +19,11 @@ _ReSharper.*/
 *.snupkg
 packages/
 
+# ...except the vendored patched Terminal.Gui, which is how the transparent
+# background build stays reproducible without patching upstream at build time.
+!local-nuget/
+!local-nuget/*.nupkg
+
 # OS cruft
 .DS_Store
 Thumbs.db

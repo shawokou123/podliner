@@ -98,7 +98,10 @@ public sealed partial class UiShell
     {
         UI(() =>
         {
-            if (_theme == ThemeMode.User)
+            // Base, MenuAccent and User all use the palette-driven, transparent
+            // colour schemes so the terminal's glass background shows through.
+            // Only Native still follows the driver's built-in colours.
+            if (_theme is ThemeMode.User or ThemeMode.Base or ThemeMode.MenuAccent)
             {
                 var u = UiShellColorSchemes.BuildUserSchemes();
 
@@ -141,9 +144,7 @@ public sealed partial class UiShell
 
             ColorScheme scheme = _theme switch
             {
-                ThemeMode.MenuAccent => Colors.Menu,
-                ThemeMode.Base       => Colors.Base,
-                ThemeMode.Native     => BuildNativeScheme(),
+                ThemeMode.Native => BuildNativeScheme(),
                 _ => Colors.Base
             };
 
